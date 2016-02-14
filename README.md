@@ -17,5 +17,54 @@ the user's input in and abstracted representation of request, as long as it impl
 Since the library is still in development, the recommended version to install would be "the latest".
 You can do it by rnning following command:
 
-    composer require fracture/routing:dev-master
+```sh
+composer require fracture/routing:dev-master
+```
 
+##Usage
+
+```php
+<?php
+
+require '/path/to/vendor/autoload.php';
+
+/*
+ * Setting up request abstraction
+ */
+
+$builder = new Http\RequestBuilder;
+$request = $builder->create([
+    'get'    => $_GET,
+    'files'  => $_FILES,
+    'server' => $_SERVER,
+    'post'   => $_POST,
+    'cookies'=> $_COOKIE,
+]);
+
+$uri = isset($_SERVER['REQUEST_URI'])
+           ? $_SERVER['REQUEST_URI']
+           : '/';
+
+$request->setUri($uri);
+
+/*
+ * Routing the request
+ */
+
+$configuration = [
+    "optional" => [
+        "notation" => "[:key]",
+        "conditions" => [
+            "key" => "id-[0-9]+"  // looking for values like "id-5162" or "id-42"
+        ]
+    ],
+    "main" => [
+        "notation" => ":resource",
+    ]    
+];
+
+$router = new Routing\Router(new Routing\RouteBuilder);
+$router->import($configuration);
+
+$router->route($request);
+```
